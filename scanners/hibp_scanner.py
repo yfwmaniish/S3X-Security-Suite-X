@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-HMS - Have I Been Pwned Integration
-Checks email or domain breaches using Have I Been Pwned API.
-"""
+
 
 import asyncio
 import aiohttp
@@ -21,9 +18,7 @@ class HaveIBeenPwnedScanner:
         self.base_url = "https://haveibeenpwned.com/api/v3"
 
     async def check_email(self, email: str) -> Dict[str, Any]:
-        """
-        Check if an email has been breached
-        """
+      
         self.logger.info(f"Checking breaches for email: {email}")
         url = f"{self.base_url}/breachedaccount/{quote(email)}"
 
@@ -80,7 +75,7 @@ class HaveIBeenPwnedScanner:
         Check if a domain has been breached
         """
         self.logger.info(f"Checking breaches for domain: {domain}")
-        url = f"{self.base_url}/breaches"  # No direct API for domain, should query all breaches
+        url = f"{self.base_url}/breaches"  
 
         headers = {
             'hibp-api-key': self.api_key,
@@ -123,10 +118,10 @@ class HaveIBeenPwnedScanner:
 
         return results
 
-# Example usage
+
 if __name__ == "__main__":
     async def main():
-        # Replace with your actual HIBP API key
+        
         api_key = "your_hibp_api_key_here"
         scanner = HaveIBeenPwnedScanner(api_key)
         email_results = await scanner.check_email("example@example.com")
