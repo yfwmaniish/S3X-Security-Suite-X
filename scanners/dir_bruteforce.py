@@ -14,11 +14,11 @@ class DirBruteForcer:
         self.start_time = None
         self.total_requests = 0
         
-        # Common response codes to check
+        
         self.interesting_codes = [200, 301, 302, 403, 401, 500]
         
     async def fetch(self, session, path):
-        """Fetch a single path and return result info"""
+        
         url = urljoin(self.base_url + '/', path)
         try:
             async with self.semaphore:
@@ -40,16 +40,16 @@ class DirBruteForcer:
         except asyncio.TimeoutError:
             return None
         except Exception as e:
-            # Silently ignore connection errors, DNS failures, etc.
+            
             return None
             
         return None
 
     async def run(self):
-        """Run the directory brute force scan"""
+        
         self.start_time = time.time()
         
-        # Check if wordlist exists
+        
         if not Path(self.wordlist_path).exists():
             return {
                 'error': f'Wordlist not found: {self.wordlist_path}',
@@ -59,7 +59,7 @@ class DirBruteForcer:
                 'total_requests': 0
             }
         
-        # Custom headers to appear more legitimate
+        
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -78,12 +78,12 @@ class DirBruteForcer:
                 with open(self.wordlist_path, 'r', encoding='utf-8', errors='ignore') as file:
                     for line_num, line in enumerate(file, 1):
                         path = line.strip()
-                        if path and not path.startswith('#'):  # Skip empty lines and comments
+                        if path and not path.startswith('#'):  
                             paths_tested.append(path)
                             task = asyncio.create_task(self.fetch(session, path))
                             tasks.append(task)
                             
-                            # Limit batch size to prevent memory issues
+                            
                             if len(tasks) >= 1000:
                                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
                                 for result in batch_results:
@@ -91,7 +91,7 @@ class DirBruteForcer:
                                         self.found_paths.append(result)
                                 tasks = []
                 
-                # Process remaining tasks
+                
                 if tasks:
                     batch_results = await asyncio.gather(*tasks, return_exceptions=True)
                     for result in batch_results:
@@ -109,7 +109,7 @@ class DirBruteForcer:
         
         scan_time = time.time() - self.start_time
         
-        # Sort results by status code, then by path
+        
         self.found_paths.sort(key=lambda x: (x['status'], x['path']))
         
         return {
