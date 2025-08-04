@@ -1,20 +1,16 @@
-"""
-S3X Configuration File
-Contains default settings and API key configuration
-"""
+
 
 import os
 
-# Shodan API Configuration
-# Set your Shodan API key as an environment variable: SHODAN_API_KEY
+
 SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', '')
 
-# Default settings
+
 DEFAULT_TIMEOUT = 10
 DEFAULT_THREADS = 10
 DEFAULT_USER_AGENT = 'S3X/1.0 (Security Suite X)'
 
-# S3 Configuration
+
 S3_REGIONS = [
     'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
     'eu-west-1', 'eu-west-2', 'eu-west-3', 'eu-central-1',
@@ -22,7 +18,7 @@ S3_REGIONS = [
     'ap-northeast-1', 'ap-northeast-2', 'sa-east-1'
 ]
 
-# Common S3 bucket patterns to test
+
 S3_BUCKET_PATTERNS = [
     '{target}',
     '{target}-backup',
@@ -47,12 +43,12 @@ S3_BUCKET_PATTERNS = [
     'files-{target}'
 ]
 
-# FTP Configuration
+
 FTP_DEFAULT_PORT = 21
 FTP_ANONYMOUS_USERS = ['anonymous', 'ftp', 'guest']
 FTP_TIMEOUT = 10
 
-# JWT Configuration
+
 JWT_COMMON_SECRETS = [
     'secret',
     'password',
@@ -77,7 +73,7 @@ JWT_COMMON_SECRETS = [
     'jwt_secret'
 ]
 
-# Dev Endpoint Configuration
+
 DEFAULT_DEV_ENDPOINTS = [
     '/debug',
     '/test',
@@ -148,7 +144,7 @@ DEFAULT_DEV_ENDPOINTS = [
     '/rdp'
 ]
 
-# Risk levels for findings
+
 RISK_LEVELS = {
     'CRITICAL': 'red',
     'HIGH': 'yellow',
@@ -157,15 +153,15 @@ RISK_LEVELS = {
     'INFO': 'cyan'
 }
 
-# Output formatting
+
 MAX_LINE_LENGTH = 80
 BANNER_TEXT = """
-██████╗ ███████╗██╗  ██╗
-██╔═══╝░██╔════╝╚██╗██╔╝
-██████╗░███████╗░╚███╔╝░
-╚═══██║░╚════██║░██╔██╗░
-██████╔╝░███████║██╔╝░██╗
-╚═════╝░░╚══════╝╚═╝░░╚═╝
-
+ ░▒▓███████▓▒░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░             ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░             ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+ ░▒▓██████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░  
+       ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+       ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓███████▓▒░░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░ 
 Security Suite X v1.0
 """
