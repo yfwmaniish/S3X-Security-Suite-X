@@ -1,5 +1,72 @@
 # S3X - Security Suite X
 
+S3X (Security Suite X) is a comprehensive, lightweight security tool tailored for infrastructure security scanning and vulnerability assessment. Designed for efficiency and versatility, it helps detect misconfigurations and security issues across various platforms.
+
+## Features
+
+- **S3 Bucket Scanning**
+- **FTP Service Analysis**
+- **JWT Security Checks**
+- **Subdomain Enumeration**
+- **Advanced Port Scanning**
+- **SSL/TLS Security Analysis**
+- **Integration with VirusTotal**
+- **Developers and Debug Endpoints Detection**
+- **Dorking and External Reconnaissance**
+
+## Installation
+
+### Prerequisites
+
+- **Python 3.7 or higher**
+- **pip**
+
+### Steps
+
+1. Clone the repository:
+
+    ```sh
+    git clone https://github.com/yfwmaniish/s3x.git
+    cd s3x
+    ```
+
+2. Install the necessary packages:
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+## Usage
+
+```sh
+python s3x.py --target example.com --all
+```
+
+### Options:
+
+- `--target`: Target to scan (IP, domain, URL, or S3 bucket name)
+- `--jwt`: JWT token for analysis
+- `--all`: Run all available scans (requires target)
+- Specific modules such as `--s3`, `--subdomain`, `--ssl`
+- `--api-key`: Provide API key directly for services
+- `--verbose`: Enable detailed output
+- `--quiet`: Suppress non-essential output
+
+## Contribution Guide
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature-branch`)
+3. Make your changes
+4. Commit those changes (`git commit -m 'Description of changes'`)
+5. Push to your branch (`git push origin feature-branch`)
+6. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+# S3X - Security Suite X
+
 **Made by S3X Team**
 
 S3X (Security Suite X) is a powerful and lightweight Python-based security tool designed to detect and exploit common infrastructure misconfigurations.
