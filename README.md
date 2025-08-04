@@ -1,8 +1,8 @@
-# V$$ - Vulnerability Scanner & Security Suite
+# S3X - Security Suite X
 
-**Made by Decimal & Vectorindia1 by Team H4$HCR4CK**
+**Made by S3X Team**
 
-V$$ (Vulnerability Scanner & Security Suite) is a powerful and lightweight Python-based security tool designed to detect and exploit common infrastructure misconfigurations.
+S3X (Security Suite X) is a powerful and lightweight Python-based security tool designed to detect and exploit common infrastructure misconfigurations.
 
 ## Features
 
