@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""
-HMS - Advanced Port Scanner
-Performs comprehensive port scanning with service detection, version identification, 
-and vulnerability assessment for discovered services.
-"""
+
 
 import asyncio
 import socket
@@ -22,7 +18,7 @@ class AdvancedPortScanner:
         self.max_concurrent = max_concurrent
         self.logger = logging.getLogger(__name__)
         
-        # Service signatures for identification
+       
         self.service_signatures = {
             'http': {
                 'ports': [80, 8080, 8000, 8888, 9090],
@@ -78,7 +74,7 @@ class AdvancedPortScanner:
             }
         }
         
-        # Known vulnerabilities database (simplified)
+       
         self.vulnerability_db = {
             'apache': {
                 '2.4.49': ['CVE-2021-41773', 'CVE-2021-42013'],
@@ -123,7 +119,7 @@ class AdvancedPortScanner:
         Main scanning function with advanced service detection
         """
         if ports is None:
-            ports = list(range(1, 1001))  # Default port range
+            ports = list(range(1, 1001))  
             
         self.logger.info(f"Starting advanced port scan for {target}")
         
@@ -143,23 +139,23 @@ class AdvancedPortScanner:
         }
         
         try:
-            # Phase 1: Basic port scanning
+           
             open_ports = await self._scan_ports_basic(target, ports)
             results['open_ports'] = sorted(open_ports)
             results['stats']['total_open'] = len(open_ports)
             
-            # Phase 2: Service detection and banner grabbing
+            
             if open_ports:
                 services = await self._detect_services(target, open_ports)
                 results['services'] = services
                 results['stats']['services_identified'] = len([s for s in services.values() if s.get('service')])
                 
-                # Phase 3: Vulnerability assessment
+                
                 vulnerabilities = self._assess_vulnerabilities(services)
                 results['vulnerabilities'] = vulnerabilities
                 results['stats']['vulnerabilities_found'] = len(vulnerabilities)
                 
-                # Create findings
+                
                 self._create_findings(results, open_ports, services, vulnerabilities)
                 
         except Exception as e:
@@ -199,7 +195,7 @@ class AdvancedPortScanner:
     async def _detect_services(self, target: str, ports: List[int]) -> Dict[int, Dict[str, Any]]:
         """Advanced service detection with banner grabbing"""
         services = {}
-        semaphore = asyncio.Semaphore(50)  # Lower concurrency for service detection
+        semaphore = asyncio.Semaphore(50)  
         
         async def detect_service(port):
             async with semaphore:
@@ -213,7 +209,7 @@ class AdvancedPortScanner:
                 }
                 
                 try:
-                    # Try to identify service type based on port
+                    
                     service_type = self._guess_service_by_port(port)
                     
                     if service_type in ['http', 'https']:
@@ -223,7 +219,7 @@ class AdvancedPortScanner:
                     elif service_type in ['ftp', 'smtp', 'mysql']:
                         service_info.update(await self._probe_generic_service(target, port, service_type))
                     else:
-                        # Generic banner grab
+                        
                         service_info.update(await self._probe_generic_service(target, port, 'unknown'))
                         
                 except Exception as e:
@@ -263,12 +259,12 @@ class AdvancedPortScanner:
                     info['status_code'] = response.status
                     info['banner'] = str(response.headers)
                     
-                    # Extract server information
+                    
                     server_header = response.headers.get('Server', '')
                     if server_header:
                         info['server'] = server_header
                         
-                        # Extract version information
+                        
                         if 'Apache/' in server_header:
                             match = re.search(r'Apache/(\d+\.\d+\.\d+)', server_header)
                             if match:
@@ -317,12 +313,12 @@ class AdvancedPortScanner:
                 timeout=self.timeout
             )
             
-            # SSH servers send their banner immediately
+           
             banner = await asyncio.wait_for(reader.readline(), timeout=2)
             banner_str = banner.decode('utf-8', errors='ignore').strip()
             info['banner'] = banner_str
             
-            # Extract SSH version
+            
             if 'OpenSSH_' in banner_str:
                 match = re.search(r'OpenSSH_(\d+\.\d+)', banner_str)
                 if match:
@@ -347,13 +343,13 @@ class AdvancedPortScanner:
                 timeout=self.timeout
             )
             
-            # Try to read banner
+           
             try:
                 banner = await asyncio.wait_for(reader.read(1024), timeout=2)
                 banner_str = banner.decode('utf-8', errors='ignore')
                 info['banner'] = banner_str
                 
-                # Apply service-specific signatures
+                
                 if service_type in self.service_signatures:
                     for pattern, info_type in self.service_signatures[service_type]['signatures']:
                         match = pattern.search(banner)
@@ -365,7 +361,7 @@ class AdvancedPortScanner:
                                 info[info_type] = match.group(1) if match.groups() else match.group(0)
                 
             except asyncio.TimeoutError:
-                pass  # No banner available
+                pass  
             
             writer.close()
             await writer.wait_closed()
@@ -384,7 +380,7 @@ class AdvancedPortScanner:
             version = service_info.get('version')
             
             if service and version:
-                # Check vulnerability database
+                
                 if service in self.vulnerability_db:
                     service_vulns = self.vulnerability_db[service]
                     if version in service_vulns:
@@ -399,7 +395,7 @@ class AdvancedPortScanner:
                             }
                             vulnerabilities.append(vuln)
                 
-                # Check for general service vulnerabilities
+                
                 vulns = self._check_service_vulnerabilities(service, version, service_info)
                 vulnerabilities.extend(vulns)
         
@@ -407,7 +403,7 @@ class AdvancedPortScanner:
 
     def _get_cve_severity(self, cve: str) -> str:
         """Get CVE severity (simplified implementation)"""
-        # In a real implementation, this would query CVE databases
+        
         high_risk_cves = ['CVE-2021-41773', 'CVE-2021-42013', 'CVE-2020-15778']
         if cve in high_risk_cves:
             return 'CRITICAL'
@@ -418,7 +414,7 @@ class AdvancedPortScanner:
         vulnerabilities = []
         port = service_info.get('port')
         
-        # Check for outdated versions (simplified)
+        
         outdated_versions = {
             'apache': '2.4.50',
             'nginx': '1.21.0',
@@ -441,11 +437,11 @@ class AdvancedPortScanner:
                         'description': f'{service} {version} is outdated. Latest version: {outdated_versions[service]}'
                     })
             except ValueError:
-                pass  # Version comparison failed
+                pass  
         
-        # Check for weak SSL/TLS configurations
+        
         if service_info.get('ssl_enabled') and service in ['https', 'http']:
-            # This would require additional SSL/TLS testing
+            
             pass
         
         return vulnerabilities
@@ -454,7 +450,7 @@ class AdvancedPortScanner:
                         services: Dict[int, Dict[str, Any]], vulnerabilities: List[Dict[str, Any]]):
         """Create findings from scan results"""
         
-        # Open port findings
+        
         for port in open_ports:
             service_info = services.get(port, {})
             service_name = service_info.get('service', 'unknown')
@@ -471,11 +467,11 @@ class AdvancedPortScanner:
             }
             
             if service_info.get('banner'):
-                finding['banner'] = service_info['banner'][:200]  # Truncate long banners
+                finding['banner'] = service_info['banner'][:200]  
                 
             results['findings'].append(finding)
         
-        # Vulnerability findings
+        
         for vuln in vulnerabilities:
             finding = {
                 'type': 'Service Vulnerability',
@@ -491,7 +487,7 @@ class AdvancedPortScanner:
                 
             results['findings'].append(finding)
 
-# Example usage
+
 if __name__ == "__main__":
     async def main():
         scanner = AdvancedPortScanner()
