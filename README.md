@@ -1,6 +1,8 @@
 # S3X - Security Suite X
 
-S3X (Security Suite X) is a comprehensive, lightweight security tool tailored for infrastructure security scanning and vulnerability assessment. Designed for efficiency and versatility, it helps detect misconfigurations and security issues across various platforms.
+**Made by Decimal & Vectorindia01 By Team H4$HCR4Ck**
+
+S3X (Security Suite X) is a comprehensive, lightweight Python-based security tool designed to detect and exploit common infrastructure misconfigurations. Built for efficiency and versatility, it targets vulnerabilities across various platforms.
 
 ## Features
 
@@ -26,8 +28,8 @@ S3X (Security Suite X) is a comprehensive, lightweight security tool tailored fo
 1. Clone the repository:
 
     ```sh
-    git clone https://github.com/yfwmaniish/s3x.git
-    cd s3x
+    git clone https://github.com/yfwmaniish/S3X-Security-Suite-X.git
+    cd S3X-Security-Suite-X
     ```
 
 2. Install the necessary packages:
@@ -38,6 +40,8 @@ S3X (Security Suite X) is a comprehensive, lightweight security tool tailored fo
 
 ## Usage
 
+Run S3X using Python:
+
 ```sh
 python s3x.py --target example.com --all
 ```
@@ -45,7 +49,7 @@ python s3x.py --target example.com --all
 ### Options:
 
 - `--target`: Target to scan (IP, domain, URL, or S3 bucket name)
-- `--jwt`: JWT token for analysis
+- `--jwt`: JWT token to analyze
 - `--all`: Run all available scans (requires target)
 - Specific modules such as `--s3`, `--subdomain`, `--ssl`
 - `--api-key`: Provide API key directly for services
