@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""
-HMS - Subdomain Enumeration Scanner
-Discovers subdomains using multiple techniques including DNS brute force,
-certificate transparency logs, and search engines.
-"""
+
 
 import asyncio
 import aiohttp
@@ -24,7 +20,7 @@ class SubdomainScanner:
         self.logger = logging.getLogger(__name__)
         self.found_subdomains: Set[str] = set()
         
-        # Common subdomain wordlist
+        
         self.common_subdomains = [
             'www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'pop', 'ns1', 'webdisk',
             'ns2', 'cpanel', 'whm', 'autodiscover', 'autoconfig', 'mx', 'email', 'imap',
@@ -38,9 +34,7 @@ class SubdomainScanner:
         ]
 
     async def scan(self, target: str) -> Dict[str, Any]:
-        """
-        Main scanning function that orchestrates all subdomain discovery techniques
-        """
+      
         domain = self._extract_domain(target)
         self.logger.info(f"Starting subdomain enumeration for {domain}")
         
@@ -58,7 +52,7 @@ class SubdomainScanner:
         }
         
         try:
-            # Run all discovery techniques concurrently
+           
             techniques = await asyncio.gather(
                 self._dns_bruteforce(domain),
                 self._certificate_transparency(domain),
@@ -67,7 +61,7 @@ class SubdomainScanner:
                 return_exceptions=True
             )
             
-            # Process results from all techniques
+            
             for i, technique_result in enumerate(techniques):
                 if isinstance(technique_result, Exception):
                     self.logger.warning(f"Technique {i} failed: {technique_result}")
@@ -76,16 +70,16 @@ class SubdomainScanner:
                 if technique_result:
                     self.found_subdomains.update(technique_result)
             
-            # Verify alive subdomains
+            
             alive_subdomains = await self._verify_subdomains(list(self.found_subdomains))
             
-            # Format results
+            
             results['subdomains'] = sorted(list(self.found_subdomains))
             results['stats']['total_found'] = len(self.found_subdomains)
             results['stats']['alive_subdomains'] = len(alive_subdomains)
             results['stats']['techniques_used'] = ['dns_bruteforce', 'certificate_transparency', 'search_engines', 'zone_transfer']
             
-            # Create findings for alive subdomains
+            
             for subdomain in alive_subdomains:
                 results['findings'].append({
                     'type': 'Subdomain Discovery',
@@ -108,13 +102,13 @@ class SubdomainScanner:
         return results
 
     def _extract_domain(self, target: str) -> str:
-        """Extract domain from URL or return as-is if already a domain"""
+       
         if target.startswith(('http://', 'https://')):
             return urlparse(target).netloc
         return target
 
     async def _dns_bruteforce(self, domain: str) -> Set[str]:
-        """Perform DNS brute force using common subdomain wordlist"""
+        
         self.logger.info("Starting DNS brute force")
         found = set()
         
@@ -124,24 +118,24 @@ class SubdomainScanner:
             async with semaphore:
                 full_domain = f"{subdomain}.{domain}"
                 try:
-                    # Use asyncio to run DNS resolution in thread pool
+                    
                     loop = asyncio.get_event_loop()
                     await loop.run_in_executor(None, socket.gethostbyname, full_domain)
                     found.add(full_domain)
                     self.logger.debug(f"Found subdomain: {full_domain}")
                 except (socket.gaierror, socket.herror):
-                    pass  # Subdomain doesn't exist
+                    pass  
                 except Exception as e:
                     self.logger.debug(f"Error checking {full_domain}: {e}")
         
-        # Create tasks for all subdomains
+        
         tasks = [check_subdomain(sub) for sub in self.common_subdomains]
         await asyncio.gather(*tasks, return_exceptions=True)
         
         return found
 
     async def _certificate_transparency(self, domain: str) -> Set[str]:
-        """Query certificate transparency logs for subdomains"""
+        
         self.logger.info("Querying certificate transparency logs")
         found = set()
         
@@ -179,26 +173,25 @@ class SubdomainScanner:
         return found
 
     async def _search_engine_discovery(self, domain: str) -> Set[str]:
-        """Use search engines to discover subdomains (limited without API keys)"""
+        
         self.logger.info("Attempting search engine discovery")
         found = set()
         
-        # This is a basic implementation - in practice, you'd use search engine APIs
-        # For now, we'll just return empty set as most search engines block automated queries
+        
         return found
 
     async def _dns_zone_transfer(self, domain: str) -> Set[str]:
-        """Attempt DNS zone transfer (rarely works but worth trying)"""
+        
         self.logger.info("Attempting DNS zone transfer")
         found = set()
         
         try:
-            # Get NS records
+            
             ns_records = dns.resolver.resolve(domain, 'NS')
             
             for ns in ns_records:
                 try:
-                    # Attempt zone transfer
+                    
                     zone = dns.zone.from_xfr(dns.query.xfr(str(ns), domain))
                     for name in zone.nodes.keys():
                         subdomain = f"{name}.{domain}"
@@ -213,7 +206,7 @@ class SubdomainScanner:
         return found
 
     async def _verify_subdomains(self, subdomains: List[str]) -> List[str]:
-        """Verify which subdomains are actually alive"""
+        
         self.logger.info(f"Verifying {len(subdomains)} subdomains")
         alive = []
         
@@ -230,7 +223,7 @@ class SubdomainScanner:
                             try:
                                 url = f"{scheme}://{subdomain}"
                                 async with session.get(url) as response:
-                                    if response.status < 500:  # Any response except server errors
+                                    if response.status < 500:  
                                         alive.append(subdomain)
                                         return
                             except:
@@ -238,13 +231,13 @@ class SubdomainScanner:
                 except Exception as e:
                     self.logger.debug(f"Error verifying {subdomain}: {e}")
         
-        # Create tasks for all subdomains
+        
         tasks = [check_alive(sub) for sub in subdomains]
         await asyncio.gather(*tasks, return_exceptions=True)
         
         return alive
 
-# Example usage
+
 if __name__ == "__main__":
     async def main():
         scanner = SubdomainScanner()
