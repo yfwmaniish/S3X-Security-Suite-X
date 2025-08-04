@@ -9,14 +9,14 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 setup(
-    name="vss-scanner",
+name="s3x-scanner",
     version="1.0.0",
-    author="Decimal & Vectorindia1 by Team H4$HCR4CK",
+    author="S3X Team",
     author_email="",
-    description="V$$ - Vulnerability Scanner & Security Suite",
+    description="S3X - Security Suite X",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yfwmaniish/vss",
+    url="https://github.com/yfwmaniish/s3x",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",

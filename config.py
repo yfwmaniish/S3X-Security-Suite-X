@@ -11,7 +11,7 @@ SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', 'CfVIImWmMGQnSVamidIibFzCs8wXG5ia')
 # Default settings
 DEFAULT_TIMEOUT = 10
 DEFAULT_THREADS = 10
-DEFAULT_USER_AGENT = 'HMS/1.0 (Hybrid Misconfiguration Scanner)'
+DEFAULT_USER_AGENT = 'S3X/1.0 (Security Suite X)'
 
 # S3 Configuration
 S3_REGIONS = [

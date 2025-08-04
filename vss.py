@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-V$$ - Vulnerability Scanner & Security Suite
-Made by Decimal & Vectorindia1 by Team H4$HCR4CK
+S3X - Security Suite X
+Made by S3X Team
 """
 
 import argparse
