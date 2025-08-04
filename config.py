@@ -6,6 +6,7 @@ Contains default settings and API key configuration
 import os
 
 # Shodan API Configuration
+# Set your Shodan API key as an environment variable: SHODAN_API_KEY
 SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', '')
 
 # Default settings
