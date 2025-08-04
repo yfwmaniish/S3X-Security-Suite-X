@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-HMS - VirusTotal Integration
-Checks URL/domain reputation using VirusTotal API.
-"""
+
 
 import asyncio
 import aiohttp
@@ -21,8 +18,8 @@ class VirusTotalScanner:
         self.logger = logging.getLogger(__name__)
         self.base_url = "https://www.virustotal.com/api/v3"
         
-        # Rate limiting (4 requests per minute for free tier)
-        self.rate_limit_delay = 15  # seconds between requests
+       
+        self.rate_limit_delay = 15  
         
     async def scan(self, target: str) -> Dict[str, Any]:
         """
@@ -48,25 +45,25 @@ class VirusTotalScanner:
             return results
         
         try:
-            # Parse target to get components
+            
             parsed_url = urlparse(target if target.startswith(('http://', 'https://')) else f'http://{target}')
             domain = parsed_url.netloc or parsed_url.path
             
-            # Scan URL
+           
             if target.startswith(('http://', 'https://')):
                 url_results = await self._scan_url(target)
                 results['url_analysis'] = url_results
                 if url_results.get('findings'):
                     results['findings'].extend(url_results['findings'])
             
-            # Scan domain
+            
             if domain:
                 domain_results = await self._scan_domain(domain)
                 results['domain_analysis'] = domain_results
                 if domain_results.get('findings'):
                     results['findings'].extend(domain_results['findings'])
                 
-                # Get IP and scan it
+                
                 ip_address = domain_results.get('ip_address')
                 if ip_address:
                     ip_results = await self._scan_ip(ip_address)
@@ -91,24 +88,24 @@ class VirusTotalScanner:
         results = {'findings': [], 'stats': {}, 'scan_date': None}
         
         try:
-            # Create URL ID for VirusTotal
+            
             url_id = base64.urlsafe_b64encode(url.encode()).decode().strip('=')
             
             headers = {'X-Apikey': self.api_key}
             
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
-                # Get URL analysis
+                
                 async with session.get(f"{self.base_url}/urls/{url_id}", headers=headers) as response:
                     if response.status == 200:
                         data = await response.json()
                         attributes = data.get('data', {}).get('attributes', {})
                         
-                        # Extract scan results
+                        
                         last_analysis_stats = attributes.get('last_analysis_stats', {})
                         results['stats'] = last_analysis_stats
                         results['scan_date'] = attributes.get('last_analysis_date')
                         
-                        # Check for malicious detections
+                        
                         malicious_count = last_analysis_stats.get('malicious', 0)
                         suspicious_count = last_analysis_stats.get('suspicious', 0)
                         
@@ -130,7 +127,7 @@ class VirusTotalScanner:
                                 'total_scans': sum(last_analysis_stats.values())
                             })
                         
-                        # Extract detailed scan results
+                        
                         last_analysis_results = attributes.get('last_analysis_results', {})
                         results['detailed_results'] = {}
                         
@@ -143,7 +140,7 @@ class VirusTotalScanner:
                                 }
                     
                     elif response.status == 404:
-                        # URL not found, submit for analysis
+                        
                         await self._submit_url_for_analysis(session, url, headers)
                         results['findings'].append({
                             'type': 'URL Not Analyzed',
@@ -158,7 +155,7 @@ class VirusTotalScanner:
                             'description': f'VirusTotal API error: {response.status}'
                         })
             
-            # Rate limiting
+            
             await asyncio.sleep(self.rate_limit_delay)
             
         except Exception as e:
@@ -179,23 +176,23 @@ class VirusTotalScanner:
             headers = {'X-Apikey': self.api_key}
             
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
-                # Get domain analysis
+                
                 async with session.get(f"{self.base_url}/domains/{domain}", headers=headers) as response:
                     if response.status == 200:
                         data = await response.json()
                         attributes = data.get('data', {}).get('attributes', {})
                         
-                        # Extract scan results
+                        
                         last_analysis_stats = attributes.get('last_analysis_stats', {})
                         results['stats'] = last_analysis_stats
                         
-                        # Get IP address
+                        
                         results['ip_address'] = attributes.get('last_dns_records', [{}])[0].get('value')
                         
-                        # Get WHOIS data
+                        
                         results['whois'] = attributes.get('whois', '')
                         
-                        # Check for malicious detections
+                        
                         malicious_count = last_analysis_stats.get('malicious', 0)
                         suspicious_count = last_analysis_stats.get('suspicious', 0)
                         
@@ -217,7 +214,7 @@ class VirusTotalScanner:
                                 'total_scans': sum(last_analysis_stats.values())
                             })
                         
-                        # Check domain reputation
+                        
                         reputation = attributes.get('reputation', 0)
                         if reputation < -50:
                             results['findings'].append({
@@ -241,7 +238,7 @@ class VirusTotalScanner:
                             'description': f'VirusTotal API error for domain: {response.status}'
                         })
             
-            # Rate limiting
+            
             await asyncio.sleep(self.rate_limit_delay)
             
         except Exception as e:
@@ -255,28 +252,28 @@ class VirusTotalScanner:
         return results
     
     async def _scan_ip(self, ip_address: str) -> Dict[str, Any]:
-        """Scan IP address using VirusTotal API"""
+        
         results = {'findings': [], 'stats': {}, 'country': None, 'as_owner': None}
         
         try:
             headers = {'X-Apikey': self.api_key}
             
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
-                # Get IP analysis
+                
                 async with session.get(f"{self.base_url}/ip_addresses/{ip_address}", headers=headers) as response:
                     if response.status == 200:
                         data = await response.json()
                         attributes = data.get('data', {}).get('attributes', {})
                         
-                        # Extract scan results
+                        
                         last_analysis_stats = attributes.get('last_analysis_stats', {})
                         results['stats'] = last_analysis_stats
                         
-                        # Get geolocation info
+                        
                         results['country'] = attributes.get('country')
                         results['as_owner'] = attributes.get('as_owner')
                         
-                        # Check for malicious detections
+                        
                         malicious_count = last_analysis_stats.get('malicious', 0)
                         suspicious_count = last_analysis_stats.get('suspicious', 0)
                         
@@ -298,7 +295,7 @@ class VirusTotalScanner:
                                 'total_scans': sum(last_analysis_stats.values())
                             })
                         
-                        # Check IP reputation
+                        
                         reputation = attributes.get('reputation', 0)
                         if reputation < -50:
                             results['findings'].append({
@@ -315,7 +312,7 @@ class VirusTotalScanner:
                             'description': f'VirusTotal API error for IP: {response.status}'
                         })
             
-            # Rate limiting
+            
             await asyncio.sleep(self.rate_limit_delay)
             
         except Exception as e:
@@ -329,7 +326,7 @@ class VirusTotalScanner:
         return results
     
     async def _submit_url_for_analysis(self, session: aiohttp.ClientSession, url: str, headers: dict):
-        """Submit URL to VirusTotal for analysis"""
+       
         try:
             data = aiohttp.FormData()
             data.add_field('url', url)
@@ -343,10 +340,10 @@ class VirusTotalScanner:
         except Exception as e:
             self.logger.error(f"Error submitting URL for analysis: {e}")
 
-# Example usage
+
 if __name__ == "__main__":
     async def main():
-        # Replace with your actual VirusTotal API key
+        
         api_key = "your_virustotal_api_key_here"
         scanner = VirusTotalScanner(api_key)
         results = await scanner.scan("https://example.com")
