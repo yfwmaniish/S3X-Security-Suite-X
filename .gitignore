@@ -1,12 +1,12 @@
-# Byte-compiled / optimized / DLL files
+
 __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
+
 *.so
 
-# Distribution / packaging
+
 .Python
 build/
 develop-eggs/
@@ -27,11 +27,11 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# PyInstaller
+
 *.manifest
 *.spec
 
-# Unit test / coverage reports
+
 htmlcov/
 .tox/
 .nox/
@@ -45,21 +45,21 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Virtual environments
+
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
 
-# IDEs
+
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+
 .DS_Store
 .DS_Store?
 ._*
@@ -68,28 +68,28 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Project specific - S3X Security Suite X
+
 config_local.py
 *.log
 results/
 output/
 scan_results/
 
-# Scan result files
+
 *.json
 !requirements.json
 !package.json
 
-# Report files
+
 *_report.*
 *.pdf
 *.html
 
-# Temporary files
+
 *.tmp
 *.temp
 
-# API Keys and sensitive data
+
 .env
 api_keys.txt
 shodan_key.txt
@@ -99,6 +99,6 @@ shodan_key.txt
 secrets/
 credentials/
 
-# Custom wordlists with sensitive data
+
 custom_wordlist.txt
 private_wordlist.txt
