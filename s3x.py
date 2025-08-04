@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-S3X - Security Suite X
-Made by S3X Team
-"""
 
 import argparse
 import json
@@ -33,8 +29,8 @@ except ImportError:
     REPORT_GENERATOR_AVAILABLE = False
 
 async def run_async_scans(args, logger, results):
-    """Run asynchronous scanners"""
-    # Dev Endpoint Scanning
+    
+    
     if args.dev or args.all:
         logger.info(f"Starting dev endpoint scan for: {args.target}")
         dev_scanner = DevEndpointScanner(
@@ -46,49 +42,49 @@ async def run_async_scans(args, logger, results):
         dev_results = await dev_scanner.scan_target(args.target)
         results['scans']['dev_endpoints'] = dev_results
     
-    # Subdomain Enumeration
+   
     if args.subdomain or args.all:
         logger.info(f"Starting subdomain enumeration for: {args.target}")
         subdomain_scanner = SubdomainScanner(timeout=args.timeout)
         subdomain_results = await subdomain_scanner.scan(args.target)
         results['scans']['subdomain'] = subdomain_results
     
-    # Advanced Port Scanning with Service Detection
+   
     if args.port_scan or args.all:
         logger.info(f"Starting advanced port scan for: {args.target}")
         port_scanner = AdvancedPortScanner(timeout=5, max_concurrent=50)
-        # Scan common ports (1-1024)
+       
         common_ports = list(range(1, 1025))
         port_results = await port_scanner.scan(args.target, common_ports)
         results['scans']['port_scan'] = port_results
     
-    # SSL/TLS Analysis
+   
     if args.ssl or args.all:
         logger.info(f"Starting SSL/TLS analysis for: {args.target}")
         ssl_scanner = SSLScanner(timeout=args.timeout)
         ssl_results = await ssl_scanner.scan(args.target)
         results['scans']['ssl'] = ssl_results
     
-    # VirusTotal Scan
+  
     if args.virustotal or args.all:
         logger.info(f"Starting VirusTotal scan for: {args.target}")
-        vt_api_key = "b446ef20d8a520b0986c316dab9b5f27bf9b40a733a90c9febc8a8a8adde5ca8"
+        vt_api_key = "" #Put your Key
         vt_scanner = VirusTotalScanner(vt_api_key, timeout=args.timeout)
         vt_results = await vt_scanner.scan(args.target)
         results['scans']['virustotal'] = vt_results
     
-    # Have I Been Pwned Check
+   
     if args.hibp:
-        # For now, we'll skip HIBP since you'll provide the API key later
+        
         logger.warning("Have I Been Pwned scan requested but API key not available yet")
-        # hibp_scanner = HaveIBeenPwnedScanner(hibp_api_key)
-        # if args.email:
-        #     hibp_results = await hibp_scanner.check_email(args.email)
-        # else:
-        #     hibp_results = await hibp_scanner.check_domain(args.target)
-        # results['scans']['hibp'] = hibp_results
+          hibp_scanner = HaveIBeenPwnedScanner(hibp_api_key)
+          if args.email:
+              hibp_results = await hibp_scanner.check_email(args.email)
+          else:
+              hibp_results = await hibp_scanner.check_domain(args.target)
+          results['scans']['hibp'] = hibp_results
 
-    # Dorking Scan
+    
     if args.dorking or args.all:
         logger.info(f"Starting dorking scan for: {args.target}")
         comprehensive = args.comprehensive_dorks if hasattr(args, 'comprehensive_dorks') else False
@@ -97,13 +93,13 @@ async def run_async_scans(args, logger, results):
         dorking_results = await dorking_module.scan(args.target)
         results['scans']['dorking'] = dorking_results
 
-    # Directory Brute Forcing
+    
     if args.dir_bruteforce or args.all:
         logger.info(f"Starting directory brute forcing for: {args.target}")
-        # Use custom wordlist if provided, otherwise use default
+        
         wordlist_path = args.wordlist or 'wordlists/dev_endpoints.txt'
         
-        # Ensure target is formatted as URL
+        
         target_url = args.target
         if not target_url.startswith(('http://', 'https://')):
             target_url = f"http://{target_url}"
@@ -117,10 +113,10 @@ async def run_async_scans(args, logger, results):
         dir_results = await dir_bruteforcer.run()
         results['scans']['dir_bruteforce'] = dir_results
 
-    # Cookie Security Analysis
+   
     if args.cookie_security or args.all:
         logger.info(f"Starting cookie security analysis for: {args.target}")
-        # Ensure target is formatted as URL
+        
         target_url = args.target
         if not target_url.startswith(('http://', 'https://')):
             target_url = f"http://{target_url}"
@@ -148,13 +144,13 @@ Examples:
         """
     )
     
-    # Target options
+    
     parser.add_argument('-t', '--target', 
                        help='Target to scan (IP, domain, URL, or S3 bucket name)')
     parser.add_argument('--jwt', 
                        help='JWT token to analyze')
     
-    # Scan modules
+    
     parser.add_argument('--all', action='store_true',
                        help='Run all available scans (requires target)')
     parser.add_argument('--s3', action='store_true',
@@ -190,7 +186,7 @@ Examples:
     parser.add_argument('--cookie-security', action='store_true',
                        help='Analyze HTTP cookies for security vulnerabilities')
     
-    # Configuration
+    
     parser.add_argument('--api-key', 
                        help='Shodan API key (or set SHODAN_API_KEY env var)')
     parser.add_argument('--wordlist', 
@@ -200,7 +196,7 @@ Examples:
     parser.add_argument('--threads', type=int, default=10,
                        help='Number of concurrent threads (default: 10)')
     
-    # Output options
+    
     parser.add_argument('-o', '--output', 
                        help='Save results to file')
     parser.add_argument('--json', action='store_true',
@@ -216,13 +212,13 @@ Examples:
     
     args = parser.parse_args()
     
-    # Initialize logger
+    
     logger = Logger(verbose=args.verbose, quiet=args.quiet, json_output=args.json)
     
     if not args.quiet:
         logger.print_banner()
     
-    # Validate arguments
+    
     if not args.target and not args.jwt:
         logger.error("Either --target or --jwt must be specified")
         parser.print_help()
@@ -232,7 +228,7 @@ Examples:
         logger.error("--all requires a target to be specified")
         sys.exit(1)
     
-    # Initialize results storage
+    
     results = {
         'target': args.target,
         'timestamp': logger.get_timestamp(),
@@ -240,16 +236,16 @@ Examples:
     }
     
     try:
-        # JWT Analysis
+        
         if args.jwt:
             logger.info("Starting JWT analysis...")
             jwt_scanner = JWTScanner(logger)
             jwt_results = jwt_scanner.analyze_token(args.jwt)
             results['scans']['jwt'] = jwt_results
         
-        # Target-based scans
+        
         if args.target:
-            # S3 Bucket Scanning
+            
             if args.s3 or args.s3_bucket or args.all:
                 logger.info(f"Starting S3 bucket scan for: {args.target}")
                 s3_scanner = S3Scanner(logger, timeout=args.timeout)
@@ -259,17 +255,16 @@ Examples:
                     s3_results = s3_scanner.scan_target(args.target)
                 results['scans']['s3'] = s3_results
             
-            # FTP Scanning
+            
             if args.ftp or args.all:
                 logger.info(f"Starting FTP scan for: {args.target}")
                 ftp_scanner = FTPScanner(logger, timeout=args.timeout)
                 ftp_results = ftp_scanner.scan_target(args.target)
                 results['scans']['ftp'] = ftp_results
             
-            # Dev Endpoint Scanning (moved to async section)
-            # This will be handled in the async function
             
-            # Shodan Lookup
+            
+           
             if args.shodan or args.all:
                 api_key = args.api_key or config.SHODAN_API_KEY
                 if not api_key:
@@ -280,7 +275,7 @@ Examples:
                     shodan_results = shodan_scanner.lookup_target(args.target)
                     results['scans']['shodan'] = shodan_results
             
-            # Run async scanners if any are requested
+            
             async_scan_needed = any([
                 args.dev, args.subdomain, args.port_scan, args.ssl, args.virustotal, args.hibp, args.dorking, args.dir_bruteforce, args.cookie_security, args.all
             ])
@@ -288,7 +283,7 @@ Examples:
             if async_scan_needed:
                 asyncio.run(run_async_scans(args, logger, results))
         
-        # Output results
+        
         if args.output:
             output_path = Path(args.output)
             if args.json:
@@ -303,7 +298,7 @@ Examples:
 
         logger.print_summary(results)
 
-        # Auto-generate report
+        
         if args.auto_report:
             if not REPORT_GENERATOR_AVAILABLE:
                 logger.warning("Report generator not available. Please install dependencies.")
