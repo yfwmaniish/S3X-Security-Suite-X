@@ -1,7 +1,4 @@
-"""
-FTP Scanner Module
-Detects open/anonymous FTP services and potential vulnerabilities
-"""
+
 
 import ftplib
 import socket
@@ -17,7 +14,7 @@ class FTPScanner:
         self.timeout = timeout
 
     def scan_target(self, target):
-        """Scan target for FTP services"""
+        
         results = {
             'target': target,
             'timestamp': self.logger.get_timestamp(),
@@ -26,25 +23,25 @@ class FTPScanner:
             'findings': []
         }
 
-        # Extract hostname/IP
+        
         if target.startswith(('http://', 'https://', 'ftp://')):
             from urllib.parse import urlparse
             hostname = urlparse(target).netloc
         else:
             hostname = target
 
-        # Remove port if specified
-        if ':' in hostname and not hostname.count(':') > 1:  # Not IPv6
+        
+        if ':' in hostname and not hostname.count(':') > 1:  
             hostname = hostname.split(':')[0]
 
         self.logger.info(f"Scanning FTP service on: {hostname}")
 
-        # Scan default FTP port
+        
         ftp_result = self._scan_ftp_port(hostname, config.FTP_DEFAULT_PORT)
         if ftp_result:
             results['ftp_services'].append(ftp_result)
             
-            # Determine severity based on findings
+            
             severity = 'CRITICAL' if ftp_result['anonymous_access'] else 'MEDIUM'
             
             results['pass'] = False
@@ -56,7 +53,7 @@ class FTPScanner:
                 'details': ftp_result
             })
 
-        # Scan common alternative FTP ports
+        
         alternative_ports = [2121, 990, 989]
         for port in alternative_ports:
             self.logger.info(f"Scanning FTP on alternative port: {port}")
@@ -76,9 +73,9 @@ class FTPScanner:
         return results
 
     def _scan_ftp_port(self, hostname, port):
-        """Scan specific FTP port"""
+        
         try:
-            # Test basic connectivity
+            
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(self.timeout)
             result = sock.connect_ex((hostname, port))
@@ -100,24 +97,24 @@ class FTPScanner:
                 'vulnerabilities': []
             }
 
-            # Connect and get banner
+            
             try:
                 ftp = ftplib.FTP()
                 ftp.set_debuglevel(0)
                 
-                # Connect with timeout
+                
                 ftp.connect(hostname, port, timeout=self.timeout)
                 
-                # Get welcome message/banner
+                
                 ftp_info['banner'] = ftp.getwelcome()
                 
-                # Identify server type from banner
+                
                 ftp_info['server_type'] = self._identify_server_type(ftp_info['banner'])
                 
-                # Check for known vulnerabilities based on banner
+                
                 ftp_info['vulnerabilities'] = self._check_vulnerabilities(ftp_info['banner'])
 
-                # Test anonymous access
+                
                 ftp_info['anonymous_access'] = self._test_anonymous_access(ftp, ftp_info)
 
                 ftp.quit()
@@ -132,43 +129,43 @@ class FTPScanner:
             return None
 
     def _test_anonymous_access(self, ftp, ftp_info):
-        """Test for anonymous FTP access"""
+        
         for username in config.FTP_ANONYMOUS_USERS:
             try:
                 self.logger.info(f"Testing anonymous login with username: {username}")
                 
-                # Try anonymous login
+                
                 ftp.login(username, 'anonymous@example.com')
                 
                 self.logger.success(f"Anonymous FTP access successful with username: {username}")
                 
-                # If successful, try to list directories
+                
                 try:
                     directories = ftp.nlst()
-                    ftp_info['directories'] = directories[:10]  # Limit to first 10
+                    ftp_info['directories'] = directories[:10]  
                     self.logger.info(f"Found {len(directories)} directories/files")
                 except Exception:
                     pass
 
-                # Test common FTP commands to gather more info
+                
                 try:
                     features = []
                     
-                    # Try FEAT command
+                    
                     try:
                         feat_response = ftp.sendcmd('FEAT')
                         features.append('FEAT supported')
                     except:
                         pass
                     
-                    # Try SYST command
+                    
                     try:
                         syst_response = ftp.sendcmd('SYST')
                         features.append(f'System: {syst_response}')
                     except:
                         pass
                     
-                    # Try PWD command
+                   
                     try:
                         pwd_response = ftp.pwd()
                         features.append(f'Current directory: {pwd_response}')
@@ -183,7 +180,7 @@ class FTPScanner:
                 return True
 
             except ftplib.error_perm as e:
-                # Login failed, try next username
+                
                 self.logger.info(f"Anonymous login failed with {username}: {str(e)}")
                 continue
             except Exception as e:
@@ -193,7 +190,7 @@ class FTPScanner:
         return False
 
     def _identify_server_type(self, banner):
-        """Identify FTP server type from banner"""
+        
         if not banner:
             return 'Unknown'
         
@@ -218,7 +215,7 @@ class FTPScanner:
         return f'Unknown ({banner.split()[0] if banner.split() else "No banner"})'
 
     def _check_vulnerabilities(self, banner):
-        """Check for known FTP server vulnerabilities based on banner"""
+        
         vulnerabilities = []
         
         if not banner:
@@ -226,7 +223,7 @@ class FTPScanner:
         
         banner_lower = banner.lower()
         
-        # Known vulnerable versions (simplified list)
+        
         vulnerable_patterns = {
             'vsftpd 2.3.4': 'CVE-2011-2523 - Backdoor vulnerability',
             'proftpd 1.3.3c': 'CVE-2010-4221 - SQL injection vulnerability',
@@ -238,28 +235,28 @@ class FTPScanner:
             if pattern in banner_lower:
                 vulnerabilities.append(vuln_desc)
         
-        # Check for general indicators
+        
         if 'ftp' in banner_lower and any(word in banner_lower for word in ['2.', '1.', '0.']):
-            # This is a basic check - in real scenarios, you'd have a comprehensive CVE database
+            
             vulnerabilities.append('Potentially outdated FTP server - manual verification recommended')
         
         return vulnerabilities
         
     def _scan_ftps_port(self, hostname, port):
-        """Scan for FTPS (FTP over SSL/TLS) services"""
+        
         try:
-            # Test FTPS implicit SSL (port 990)
+            
             if port == 990:
                 return self._test_ftps_implicit(hostname, port)
             else:
-                # Test explicit FTPS (STARTTLS)
+                
                 return self._test_ftps_explicit(hostname, port)
         except Exception as e:
             self.logger.info(f"FTPS scan error on {hostname}:{port} - {str(e)}")
             return None
             
     def _test_ftps_implicit(self, hostname, port):
-        """Test implicit FTPS (SSL from connection start)"""
+        
         try:
             context = ssl.create_default_context()
             context.check_hostname = False
@@ -279,14 +276,14 @@ class FTPScanner:
                 'anonymous_access': False
             }
             
-            # Get SSL information
+            
             sock = ftp_tls.sock
             if hasattr(sock, 'version'):
                 ftps_info['ssl_version'] = sock.version()
             if hasattr(sock, 'cipher'):
                 ftps_info['cipher'] = sock.cipher()
                 
-            # Get certificate information
+            
             try:
                 cert = sock.getpeercert()
                 if cert:
@@ -299,7 +296,7 @@ class FTPScanner:
             except Exception:
                 pass
                 
-            # Test anonymous access
+            
             try:
                 ftp_tls.login('anonymous', 'anonymous@example.com')
                 ftps_info['anonymous_access'] = True
@@ -315,7 +312,7 @@ class FTPScanner:
             return None
             
     def _test_ftps_explicit(self, hostname, port):
-        """Test explicit FTPS (STARTTLS)"""
+        
         try:
             context = ssl.create_default_context()
             context.check_hostname = False
@@ -324,7 +321,7 @@ class FTPScanner:
             ftp_tls = ftplib.FTP_TLS(context=context)
             ftp_tls.connect(hostname, port, timeout=self.timeout)
             
-            # Try to start TLS
+            
             ftp_tls.auth()
             
             ftps_info = {
@@ -338,14 +335,14 @@ class FTPScanner:
                 'anonymous_access': False
             }
             
-            # Get SSL information after STARTTLS
+            
             sock = ftp_tls.sock
             if hasattr(sock, 'version'):
                 ftps_info['ssl_version'] = sock.version()
             if hasattr(sock, 'cipher'):
                 ftps_info['cipher'] = sock.cipher()
                 
-            # Get certificate information
+            
             try:
                 cert = sock.getpeercert()
                 if cert:
@@ -358,7 +355,7 @@ class FTPScanner:
             except Exception:
                 pass
                 
-            # Test anonymous access
+            
             try:
                 ftp_tls.login('anonymous', 'anonymous@example.com')
                 ftps_info['anonymous_access'] = True
@@ -374,25 +371,25 @@ class FTPScanner:
             return None
             
     def _check_ssl_configuration(self, ssl_info):
-        """Check SSL/TLS configuration for security issues"""
+        
         issues = []
         
         if not ssl_info:
             return issues
             
-        # Check SSL version
+        
         ssl_version = ssl_info.get('ssl_version', '')
         if any(weak in ssl_version.lower() for weak in ['sslv2', 'sslv3', 'tlsv1.0', 'tlsv1.1']):
             issues.append(f"Weak SSL/TLS version: {ssl_version}")
             
-        # Check cipher strength
+        
         cipher = ssl_info.get('cipher')
         if cipher:
             cipher_name = cipher[0] if isinstance(cipher, tuple) else str(cipher)
             if any(weak in cipher_name.lower() for weak in ['rc4', 'des', 'md5', 'null']):
                 issues.append(f"Weak cipher detected: {cipher_name}")
                 
-        # Check certificate validity
+        
         cert = ssl_info.get('certificate')
         if cert:
             import datetime
@@ -406,17 +403,14 @@ class FTPScanner:
         return issues
         
     def _query_cve_database(self, server_type, version):
-        """Query CVE database for known vulnerabilities"""
+        
         vulnerabilities = []
         
-        # This is a simplified example - in production, you'd use a proper CVE API
+        
         try:
-            # Example: Query NVD API (requires proper implementation)
-            query = f"{server_type} {version}"
-            # cve_results = self._search_nvd_api(query)
-            # vulnerabilities.extend(cve_results)
             
-            # For now, return known patterns
+            query = f"{server_type} {version}"
+          
             known_vulns = {
                 'vsftpd 2.3.4': ['CVE-2011-2523'],
                 'proftpd 1.3.3c': ['CVE-2010-4221'],
