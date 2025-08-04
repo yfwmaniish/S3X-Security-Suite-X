@@ -1,5 +1,5 @@
 """
-HMS Configuration File
+S3X Configuration File
 Contains default settings and API key configuration
 """
 
@@ -159,12 +159,12 @@ RISK_LEVELS = {
 # Output formatting
 MAX_LINE_LENGTH = 80
 BANNER_TEXT = """
-██╗  ██╗███╗   ███╗███████╗
-██║  ██║████╗ ████║██╔════╝
-███████║██╔████╔██║███████╗
-██╔══██║██║╚██╔╝██║╚════██║
-██║  ██║██║ ╚═╝ ██║███████║
-╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+██████╗ ███████╗██╗  ██╗
+██╔═══╝░██╔════╝╚██╗██╔╝
+██████╗░███████╗░╚███╔╝░
+╚═══██║░╚════██║░██╔██╗░
+██████╔╝░███████║██╔╝░██╗
+╚═════╝░░╚══════╝╚═╝░░╚═╝
 
-Hybrid Misconfiguration Scanner v1.0
+Security Suite X v1.0
 """

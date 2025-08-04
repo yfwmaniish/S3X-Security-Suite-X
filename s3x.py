@@ -131,20 +131,20 @@ async def run_async_scans(args, logger, results):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="V$$ - Vulnerability Scanner & Security Suite",
+        description="S3X - Security Suite X",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python vss.py -t example.com --all
-  python vss.py -t 192.168.1.1 --s3 --ftp
-  python vss.py -t mybucket --s3-bucket
-  python vss.py --jwt "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  python vss.py -t example.com --shodan --api-key YOUR_KEY
-  python vss.py -t example.com --dorking --output dorking_results.json
-  python vss.py -t example.com --all --auto-report
-  python vss.py -t example.com --dev --ssl --dorking --auto-report --report-format both
-  python vss.py -t http://example.com --dir-bruteforce --wordlist custom_dirs.txt
-  python vss.py -t https://example.com --cookie-security --json
+  python s3x.py -t example.com --all
+  python s3x.py -t 192.168.1.1 --s3 --ftp
+  python s3x.py -t mybucket --s3-bucket
+  python s3x.py --jwt "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  python s3x.py -t example.com --shodan --api-key YOUR_KEY
+  python s3x.py -t example.com --dorking --output dorking_results.json
+  python s3x.py -t example.com --all --auto-report
+  python s3x.py -t example.com --dev --ssl --dorking --auto-report --report-format both
+  python s3x.py -t http://example.com --dir-bruteforce --wordlist custom_dirs.txt
+  python s3x.py -t https://example.com --cookie-security --json
         """
     )
     
