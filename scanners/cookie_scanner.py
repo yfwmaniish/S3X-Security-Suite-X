@@ -16,7 +16,7 @@ class CookieSecurityScanner:
         if not target_url.startswith(('http://', 'https://')):
             target_url = f"http://{target_url}"
         
-        # Parse URL to check if it's HTTPS
+        
         parsed_url = urlparse(target_url)
         is_https = parsed_url.scheme == 'https'
         
@@ -36,7 +36,7 @@ class CookieSecurityScanner:
             }
         }
         
-        # Custom headers to appear more legitimate
+        
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -49,10 +49,10 @@ class CookieSecurityScanner:
         
         try:
             async with aiohttp.ClientSession(headers=headers, timeout=self.timeout) as session:
-                # Get main page cookies
+                
                 await self._scan_url(session, target_url, cookies_data)
                 
-                # Also check common endpoints that might set cookies
+                
                 common_endpoints = [
                     '/login', '/auth', '/admin', '/dashboard', '/user',
                     '/account', '/profile', '/api/login', '/signin', '/session'
@@ -62,7 +62,7 @@ class CookieSecurityScanner:
                     endpoint_url = target_url.rstrip('/') + endpoint
                     await self._scan_url(session, endpoint_url, cookies_data, ignore_errors=True)
                 
-                # Analyze all found cookies
+                
                 self._analyze_cookies(cookies_data)
                 
         except Exception as e:
@@ -74,13 +74,13 @@ class CookieSecurityScanner:
         """Scan a specific URL for cookies"""
         try:
             async with session.get(url, allow_redirects=True) as response:
-                # Get cookies from Set-Cookie headers
+                
                 set_cookie_headers = response.headers.getall('Set-Cookie', [])
                 
                 for cookie_header in set_cookie_headers:
                     cookie_data = self._parse_cookie(cookie_header, url)
                     if cookie_data:
-                        # Check if we already have this cookie (by name and url)
+                        
                         existing = any(c['name'] == cookie_data['name'] and c['url'] == cookie_data['url'] 
                                      for c in cookies_data['cookies_found'])
                         if not existing:
@@ -98,7 +98,7 @@ class CookieSecurityScanner:
         if not parts:
             return None
             
-        # First part is name=value
+        
         name_value = parts[0].split('=', 1)
         if len(name_value) != 2:
             return None
@@ -120,7 +120,7 @@ class CookieSecurityScanner:
             'vulnerabilities': []
         }
         
-        # Parse attributes
+        
         for part in parts[1:]:
             attr = part.lower().strip()
             if '=' in attr:
@@ -153,7 +153,7 @@ class CookieSecurityScanner:
         for cookie in cookies_data['cookies_found']:
             vulnerabilities = []
             
-            # Check for missing Secure flag on HTTPS sites
+            
             if is_https and not cookie['secure']:
                 vulnerabilities.append({
                     'type': 'Missing Secure Flag',
@@ -161,7 +161,7 @@ class CookieSecurityScanner:
                     'description': f"Cookie '{cookie['name']}' lacks Secure flag on HTTPS site"
                 })
             
-            # Check for missing HttpOnly flag
+            
             if not cookie['httponly']:
                 vulnerabilities.append({
                     'type': 'Missing HttpOnly Flag',
@@ -169,7 +169,7 @@ class CookieSecurityScanner:
                     'description': f"Cookie '{cookie['name']}' lacks HttpOnly flag, vulnerable to XSS"
                 })
             
-            # Check for missing or weak SameSite attribute
+            
             if not cookie['samesite'] or cookie['samesite'] == 'None':
                 vulnerabilities.append({
                     'type': 'Missing/Weak SameSite',
@@ -177,7 +177,7 @@ class CookieSecurityScanner:
                     'description': f"Cookie '{cookie['name']}' lacks proper SameSite protection, vulnerable to CSRF"
                 })
             
-            # Check for overly broad domain
+            
             if cookie['domain'] and cookie['domain'].startswith('.'):
                 vulnerabilities.append({
                     'type': 'Broad Domain Scope',
@@ -185,7 +185,7 @@ class CookieSecurityScanner:
                     'description': f"Cookie '{cookie['name']}' has broad domain scope: {cookie['domain']}"
                 })
             
-            # Check for sensitive data in cookie names or values
+            
             sensitive_patterns = ['password', 'token', 'secret', 'key', 'auth', 'session', 'admin']
             cookie_text = (cookie['name'] + cookie['value']).lower()
             
@@ -198,7 +198,7 @@ class CookieSecurityScanner:
                     })
                     break
             
-            # Check for long-lived cookies (no expiration)
+            
             if not cookie['expires'] and not cookie['max_age']:
                 vulnerabilities.append({
                     'type': 'Session Cookie Without Expiration',
@@ -209,10 +209,10 @@ class CookieSecurityScanner:
             cookie['vulnerabilities'] = vulnerabilities
             cookies_data['vulnerabilities'].extend(vulnerabilities)
         
-        # Generate findings for the report
+        
         self._generate_findings(cookies_data)
         
-        # Update statistics
+        
         self._update_stats(cookies_data)
     
     def _generate_findings(self, cookies_data):
