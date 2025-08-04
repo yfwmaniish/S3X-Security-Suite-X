@@ -11,14 +11,13 @@ class Logger:
     def print_banner(self):
         if not self.quiet:
             print("""
-┌───────────────────────────────────────────────┐
-│ ┌──┐ ┌──────────────┐ ┌──────────────┐ │
-│ │  │ │              │ │              │ │
-│ │  │ │ S3X Security │ │ Suite X      │ │
-│ ╚══╝ ╚══════════════╝ ╚══════════════╝ │
-└───────────────────────────────────────────────┘
-S3X - Security Suite X v1.0
-Made by S3X Team
+ ░▒▓███████▓▒░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░             ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░             ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+ ░▒▓██████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░  
+       ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+       ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓███████▓▒░░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░                                                  
 """)
 
     def info(self, message):
@@ -42,20 +41,19 @@ Made by S3X Team
         if not self.quiet:
             print("\n--- Scan Summary ---")
             for scan, result in results['scans'].items():
-                # Determine status based on scan type and findings
+                
                 if 'pass' in result:
-                    # Special handling for dev_endpoints - findings mean successful detection
+                   
                     if scan == 'dev_endpoints':
                         if result.get('findings'):
-                            status = 'SUCCESS'  # Found exposed endpoints = successful detection
+                            status = 'SUCCESS'  
                         else:
-                            status = 'PASS'  # No exposed endpoints = clean/passing
+                            status = 'PASS' 
                     else:
-                        # For other scans with explicit pass/fail (S3, FTP, Shodan)
+                        
                         status = 'PASS' if result.get('pass', False) else 'FAIL'
                 else:
-                    # For info-gathering scans (subdomain, port, SSL, VT)
-                    # Success means the scan completed, regardless of findings
+                    
                     if 'findings' in result or 'subdomains' in result or 'open_ports' in result:
                         status = 'SUCCESS'
                     elif 'error' in result:
@@ -63,7 +61,7 @@ Made by S3X Team
                     else:
                         status = 'COMPLETED'
                 
-                # Count findings for additional context
+                
                 findings_count = len(result.get('findings', []))
                 if findings_count > 0:
                     print(f"{scan.upper()}: {status} ({findings_count} findings)")
