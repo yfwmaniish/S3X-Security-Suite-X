@@ -24,8 +24,8 @@ S3X (Security Suite X) is a powerful and lightweight Python-based security tool 
 1. Clone the repository:
 
 ```sh
-$ git clone https://github.com/yfwmaniish/vss.git
-$ cd vss
+$ git clone https://github.com/yfwmaniish/s3x.git
+$ cd s3x
 ```
 
 2. Install the dependencies:
@@ -36,10 +36,10 @@ $ pip install -r requirements.txt
 
 ## Usage
 
-Run V$$ using Python:
+Run S3X using Python:
 
 ```sh
-$ python vss.py --target example.com --all
+$ python s3x.py --target example.com --all
 ```
 
 ### Options:
