@@ -6,7 +6,8 @@ Contains default settings and API key configuration
 import os
 
 # Shodan API Configuration
-SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', 'CfVIImWmMGQnSVamidIibFzCs8wXG5ia')
+# Set your Shodan API key as an environment variable: SHODAN_API_KEY
+SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', '')
 
 # Default settings
 DEFAULT_TIMEOUT = 10

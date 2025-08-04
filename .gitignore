@@ -68,14 +68,37 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Project specific
+# Project specific - S3X Security Suite X
 config_local.py
 *.log
 results/
 output/
 scan_results/
 
-# API Keys
+# Scan result files
+*.json
+!requirements.json
+!package.json
+
+# Report files
+*_report.*
+*.pdf
+*.html
+
+# Temporary files
+*.tmp
+*.temp
+
+# API Keys and sensitive data
 .env
 api_keys.txt
 shodan_key.txt
+*.key
+*.pem
+*.crt
+secrets/
+credentials/
+
+# Custom wordlists with sensitive data
+custom_wordlist.txt
+private_wordlist.txt
