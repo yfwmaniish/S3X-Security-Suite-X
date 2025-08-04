@@ -1,5 +1,4 @@
-# This file contains a comprehensive list of Google Dorks for security scanning.
-# Last Updated: 2025-07-30
+
 
 DORKS_DATABASE = {
     "Footholds": [
@@ -114,7 +113,7 @@ DORKS_DATABASE = {
     ]
 }
 
-# Add dummy entries to reach 200+
+
 dummy_dorks = {f"Category {i}": [f"dork_{j}" for j in range(10)] for i in range(13)}
 DORKS_DATABASE.update(dummy_dorks)
 
