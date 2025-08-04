@@ -1,7 +1,4 @@
-"""
-Dev/Debug Endpoint Scanner Module
-Scans for exposed development/debug endpoints
-"""
+
 
 import requests
 import asyncio
@@ -35,7 +32,7 @@ class DevEndpointScanner:
 
         endpoints_to_scan = config.DEFAULT_DEV_ENDPOINTS
         
-        # If custom wordlist provided, load from file
+       
         if self.wordlist_path:
             self.logger.info(f"Loading endpoints from custom wordlist: {self.wordlist_path}")
             try:
@@ -43,11 +40,11 @@ class DevEndpointScanner:
                     endpoints_to_scan = [line.strip() for line in f]
             except Exception as e:
                 self.logger.error(f"Error loading custom wordlist: {e}")
-                endpoints_to_scan = config.DEFAULT_DEV_ENDPOINTS  # fallback to default
+                endpoints_to_scan = config.DEFAULT_DEV_ENDPOINTS  
 
         self.logger.info(f"Testing {len(endpoints_to_scan)} endpoints...")
 
-        # Scan using asyncio for efficiency
+        
         tasks = [self._scan_endpoint(target, endpoint) for endpoint in endpoints_to_scan]
         responses = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -66,7 +63,7 @@ class DevEndpointScanner:
 
     async def _scan_endpoint(self, target, endpoint_path):
         """Scan a specific dev/debug endpoint"""
-        # Ensure target has a scheme
+        
         if not target.startswith(('http://', 'https://')):
             target = f'https://{target}'
         
@@ -80,7 +77,7 @@ class DevEndpointScanner:
                         if response.status == 200:
                             self.logger.success(f"Exposed endpoint found: {url}")
 
-                            # Check for common indicators in response
+                            
                             response_text = await response.text()
                             response_indicators = []
 
@@ -109,7 +106,7 @@ class DevEndpointScanner:
         return None
     
     def _generate_custom_endpoints(self, base_paths):
-        """Generate additional custom endpoints from base paths"""
+        
         patterns = ['debug', 'api', 'swagger', 'admin', 'api-docs']
         generated = []
         for base in base_paths:
@@ -122,7 +119,7 @@ class DevEndpointScanner:
         return generated
     
     def _recursive_scan_mode(self, base_url, depth=1):
-        """Scan recursively to a specified depth"""
+        
         visited = set()
         
         def _recursive_scan(url, current_depth):
@@ -136,7 +133,7 @@ class DevEndpointScanner:
             except requests.RequestException:
                 return
             
-            # Parse for new links to follow
+            
             page_links = re.findall(r'href=[\'\"](.*?)[\'\"]', response.text)
             
             for link in page_links:
