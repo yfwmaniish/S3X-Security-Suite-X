@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""
-HMS - Enhanced SSL/TLS Scanner
-Advanced SSL/TLS certificate and configuration analysis with comprehensive security checks.
-Includes cipher analysis, protocol testing, and SSL Labs-style vulnerability detection.
-"""
+
 
 import asyncio
 import ssl
@@ -28,14 +24,14 @@ class SSLScanner:
         self.timeout = timeout
         self.logger = logging.getLogger(__name__)
         
-        # Define weak ciphers and protocols
+        
         self.weak_ciphers = [
             'RC4', 'DES', '3DES', 'MD5', 'SHA1', 'NULL', 'EXPORT', 'ADH', 'AECDH',
             'aNULL', 'eNULL', 'SEED', 'IDEA', 'RC2', 'PSK', 'SRP'
         ]
         self.weak_protocols = ['SSLv2', 'SSLv3', 'TLSv1', 'TLSv1.1']
         
-        # Define cipher suites for testing
+        
         self.cipher_suites = {
             'HIGH': ['ECDHE-RSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES128-GCM-SHA256'],
             'MEDIUM': ['AES256-SHA256', 'AES128-SHA256'],
@@ -43,7 +39,7 @@ class SSLScanner:
             'NULL': ['NULL-SHA', 'NULL-MD5']
         }
         
-        # SSL vulnerabilities database
+        
         self.vulnerability_tests = {
             'HEARTBLEED': {'description': 'OpenSSL Heartbleed vulnerability (CVE-2014-0160)'},
             'POODLE_SSL': {'description': 'POODLE vulnerability in SSLv3 (CVE-2014-3566)'},
@@ -77,33 +73,33 @@ class SSLScanner:
         }
         
         try:
-            # Get SSL certificate info
+            
             cert_info = await self._get_certificate_info(hostname, port)
             results['certificate'] = cert_info
             
-            # Analyze certificate for issues
+            
             cert_findings = self._analyze_certificate(cert_info)
             results['findings'].extend(cert_findings)
             
-            # Check TLS configuration
+            
             tls_config = await self._check_tls_configuration(hostname, port)
             results['tls_config'] = tls_config
             
-            # Perform comprehensive cipher analysis
+            
             cipher_analysis = await self._analyze_cipher_suites(hostname, port)
             results['cipher_analysis'] = cipher_analysis
             results['findings'].extend(cipher_analysis.get('findings', []))
             
-            # Analyze TLS configuration for vulnerabilities
+            
             tls_findings = self._analyze_tls_configuration(tls_config)
             results['findings'].extend(tls_findings)
             
-            # Check for common SSL vulnerabilities
+            
             vuln_findings = await self._check_ssl_vulnerabilities(hostname, port)
             results['vulnerabilities'] = vuln_findings
             results['findings'].extend(vuln_findings)
             
-            # Perform comprehensive vulnerability assessment
+            
             comprehensive_vulns = await self._comprehensive_vulnerability_scan(hostname, port)
             results['comprehensive_vulnerabilities'] = comprehensive_vulns
             results['findings'].extend(comprehensive_vulns.get('findings', []))
@@ -121,7 +117,7 @@ class SSLScanner:
         return results
     
     def _parse_target(self, target: str) -> tuple:
-        """Parse target to extract hostname and port"""
+        
         if target.startswith(('http://', 'https://')):
             parsed = urlparse(target)
             hostname = parsed.hostname
@@ -137,16 +133,16 @@ class SSLScanner:
         return hostname, port
     
     async def _get_certificate_info(self, hostname: str, port: int) -> Dict[str, Any]:
-        """Retrieve and parse SSL certificate information"""
+        
         try:
-            # Method 1: Try using ssl.get_server_certificate (most reliable)
+            
             try:
                 raw_cert = ssl.get_server_certificate((hostname, port), timeout=self.timeout)
                 cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, raw_cert)
             except Exception as e1:
                 self.logger.debug(f"Method 1 failed: {e1}")
                 
-                # Method 2: Try async connection with better certificate extraction
+                
                 try:
                     context = ssl.create_default_context()
                     context.check_hostname = False
@@ -172,8 +168,7 @@ class SSLScanner:
                     self.logger.debug(f"Method 2 failed: {e2}")
                     raise Exception(f"Failed to retrieve certificate: {e1}, {e2}")
             
-            # Extract certificate information
-            # Convert byte keys to strings for JSON serialization
+            
             subject_dict = {k.decode('utf-8') if isinstance(k, bytes) else str(k): 
                            v.decode('utf-8') if isinstance(v, bytes) else str(v) 
                            for k, v in cert.get_subject().get_components()}
@@ -193,7 +188,7 @@ class SSLScanner:
                 'extensions': []
             }
             
-            # Extract extensions
+            
             for i in range(cert.get_extension_count()):
                 ext = cert.get_extension(i)
                 cert_info['extensions'].append({
@@ -215,7 +210,7 @@ class SSLScanner:
         if 'error' in cert_info:
             return [{'type': 'Certificate Error', 'severity': 'HIGH', 'description': cert_info['error']}]
         
-        # Check if certificate has expired
+       
         if cert_info.get('has_expired'):
             findings.append({
                 'type': 'Expired Certificate',
@@ -223,7 +218,7 @@ class SSLScanner:
                 'description': 'SSL certificate has expired'
             })
         
-        # Check certificate expiration (warn if expires within 30 days)
+        
         try:
             not_after = datetime.strptime(cert_info['not_after'], '%Y%m%d%H%M%SZ').replace(tzinfo=timezone.utc)
             days_until_expiry = (not_after - datetime.now(timezone.utc)).days
@@ -237,7 +232,7 @@ class SSLScanner:
         except:
             pass
         
-        # Check for weak signature algorithm
+        
         sig_alg = cert_info.get('signature_algorithm', '').lower()
         if any(weak in sig_alg for weak in ['md5', 'sha1']):
             findings.append({
@@ -246,7 +241,7 @@ class SSLScanner:
                 'description': f'Certificate uses weak signature algorithm: {cert_info["signature_algorithm"]}'
             })
         
-        # Check for self-signed certificate
+        
         subject = cert_info.get('subject', {})
         issuer = cert_info.get('issuer', {})
         if subject == issuer:
@@ -266,7 +261,7 @@ class SSLScanner:
             'certificate_validation': False
         }
         
-        # Test different TLS/SSL protocols
+        
         protocols_to_test = [
             ('SSLv2', ssl.PROTOCOL_SSLv23),
             ('SSLv3', ssl.PROTOCOL_SSLv23),
@@ -292,9 +287,9 @@ class SSLScanner:
                 await writer.wait_closed()
                 
             except:
-                pass  # Protocol not supported
+                pass  
         
-        # Test certificate validation
+        
         try:
             context = ssl.create_default_context()
             reader, writer = await asyncio.wait_for(
@@ -313,7 +308,7 @@ class SSLScanner:
         """Analyze TLS configuration for vulnerabilities"""
         findings = []
         
-        # Check for weak protocols
+        
         for protocol in tls_config.get('supported_protocols', []):
             if protocol in self.weak_protocols:
                 findings.append({
@@ -322,7 +317,7 @@ class SSLScanner:
                     'description': f'Weak TLS/SSL protocol supported: {protocol}'
                 })
         
-        # Check certificate validation
+        
         if not tls_config.get('certificate_validation'):
             findings.append({
                 'type': 'Certificate Validation Failed',
@@ -333,10 +328,9 @@ class SSLScanner:
         return findings
     
     async def _check_ssl_vulnerabilities(self, hostname: str, port: int) -> List[Dict[str, Any]]:
-        """Check for common SSL vulnerabilities"""
         vulnerabilities = []
         
-        # Check for POODLE vulnerability (SSLv3)
+        
         if await self._test_protocol_support(hostname, port, ssl.PROTOCOL_SSLv23):
             vulnerabilities.append({
                 'type': 'POODLE Vulnerability',
@@ -344,7 +338,7 @@ class SSLScanner:
                 'description': 'Server supports SSLv3 which is vulnerable to POODLE attack'
             })
         
-        # Check for BEAST vulnerability (TLSv1.0 with CBC ciphers)
+        
         if 'TLSv1' in await self._get_supported_protocols(hostname, port):
             vulnerabilities.append({
                 'type': 'Potential BEAST Vulnerability',
@@ -355,7 +349,7 @@ class SSLScanner:
         return vulnerabilities
     
     async def _test_protocol_support(self, hostname: str, port: int, protocol) -> bool:
-        """Test if a specific SSL/TLS protocol is supported"""
+        
         try:
             context = ssl.SSLContext(protocol)
             context.check_hostname = False
@@ -372,7 +366,7 @@ class SSLScanner:
             return False
     
     async def _get_supported_protocols(self, hostname: str, port: int) -> List[str]:
-        """Get list of supported protocols"""
+        
         supported = []
         protocols_to_test = [
             ('TLSv1', ssl.PROTOCOL_TLSv1),
@@ -388,9 +382,7 @@ class SSLScanner:
         return supported
 
     async def _analyze_cipher_suites(self, hostname: str, port: int) -> Dict[str, Any]:
-        """
-        Analyzes supported cipher suites for weaknesses.
-        """
+       
         results = {
             'supported_ciphers': [],
             'weak_ciphers_found': [],
@@ -434,8 +426,7 @@ class SSLScanner:
         
         for vuln, details in self.vulnerability_tests.items():
             try:
-                # Placeholder for actual vulnerability check logic
-                # In a real-world scenario, this would involve specific probes for each vulnerability
+                
                 if vuln == 'POODLE_SSL' and 'SSLv3' in await self._get_supported_protocols(hostname, port):
                     results['vulnerabilities'][vuln] = {'vulnerable': True, 'description': details['description']}
                     results['findings'].append({
@@ -450,7 +441,7 @@ class SSLScanner:
         
         return results
 
-# Example usage
+
 if __name__ == "__main__":
     async def main():
         scanner = SSLScanner()
