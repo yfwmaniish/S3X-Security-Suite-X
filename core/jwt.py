@@ -1,8 +1,3 @@
-"""
-JWT Vulnerability Scanner Module
-Analyzes JWT tokens for common vulnerabilities
-"""
-
 import json
 import base64
 import hmac
@@ -15,7 +10,7 @@ class JWTScanner:
         self.logger = logger
 
     def analyze_token(self, token):
-        """Analyze JWT token for vulnerabilities"""
+        
         results = {
             'token': token[:50] + "..." if len(token) > 50 else token,
             'timestamp': self.logger.get_timestamp(),
@@ -27,7 +22,7 @@ class JWTScanner:
         self.logger.info("Starting JWT token analysis...")
 
         try:
-            # Split JWT into components
+            
             parts = token.split('.')
             if len(parts) != 3:
                 results['pass'] = False
@@ -40,7 +35,7 @@ class JWTScanner:
 
             header_b64, payload_b64, signature_b64 = parts
 
-            # Decode header
+            
             try:
                 header_json = self._decode_base64_url(header_b64)
                 header = json.loads(header_json)
@@ -55,7 +50,7 @@ class JWTScanner:
                 })
                 return results
 
-            # Decode payload
+           
             try:
                 payload_json = self._decode_base64_url(payload_b64)
                 payload = json.loads(payload_json)
@@ -70,17 +65,17 @@ class JWTScanner:
                 })
                 return results
 
-            # Check for algorithm vulnerabilities
+            
             self._check_algorithm_vulnerabilities(header, results)
 
-            # Check for weak secrets (if HMAC algorithm)
+            
             if header.get('alg', '').startswith('HS'):
                 self._check_weak_secrets(token, header, results)
 
-            # Check payload claims
+            
             self._check_payload_claims(payload, results)
 
-            # Check for signature verification bypass
+            
             self._check_signature_bypass(token, results)
 
         except Exception as e:
@@ -94,8 +89,8 @@ class JWTScanner:
         return results
 
     def _decode_base64_url(self, data):
-        """Decode base64url encoded data"""
-        # Add padding if needed
+        
+        
         missing_padding = len(data) % 4
         if missing_padding:
             data += '=' * (4 - missing_padding)
@@ -103,10 +98,10 @@ class JWTScanner:
         return base64.urlsafe_b64decode(data).decode('utf-8')
 
     def _check_algorithm_vulnerabilities(self, header, results):
-        """Check for algorithm-related vulnerabilities"""
+        
         alg = header.get('alg', '').lower()
 
-        # Check for 'none' algorithm
+       
         if alg == 'none':
             results['pass'] = False
             results['vulnerabilities'].append('none_algorithm')
@@ -117,7 +112,7 @@ class JWTScanner:
             })
             self.logger.success("CRITICAL: None algorithm vulnerability detected!")
 
-        # Check for weak algorithms
+        
         weak_algorithms = ['hs256', 'hs384', 'hs512']
         if alg in weak_algorithms:
             results['vulnerabilities'].append('weak_algorithm')
@@ -127,7 +122,7 @@ class JWTScanner:
                 'description': f'JWT uses HMAC algorithm ({alg.upper()}) which may be vulnerable to brute force attacks'
             })
 
-        # Check for algorithm confusion (RS256 vs HS256)
+        
         if alg.startswith('rs'):
             results['findings'].append({
                 'type': 'Algorithm Confusion Risk',
@@ -136,16 +131,16 @@ class JWTScanner:
             })
 
     def _check_weak_secrets(self, token, header, results):
-        """Check for weak HMAC secrets"""
+        
         self.logger.info("Testing JWT against common weak secrets...")
         
-        # Get the parts for re-signing
+        
         parts = token.split('.')
         header_payload = f"{parts[0]}.{parts[1]}"
         
         algorithm = header.get('alg', '').upper()
         
-        # Map algorithm to hashlib function
+        
         hash_functions = {
             'HS256': hashlib.sha256,
             'HS384': hashlib.sha384,
@@ -159,17 +154,17 @@ class JWTScanner:
         
         for secret in config.JWT_COMMON_SECRETS:
             try:
-                # Create signature with weak secret
+                
                 signature = hmac.new(
                     secret.encode('utf-8'),
                     header_payload.encode('utf-8'),
                     hash_func
                 ).digest()
                 
-                # Encode signature
+               
                 signature_b64 = base64.urlsafe_b64encode(signature).decode('utf-8').rstrip('=')
                 
-                # Compare with original signature
+                
                 if signature_b64 == parts[2]:
                     results['pass'] = False
                     results['vulnerabilities'].append('weak_secret')
@@ -185,9 +180,9 @@ class JWTScanner:
                 continue
 
     def _check_payload_claims(self, payload, results):
-        """Check JWT payload claims for security issues"""
         
-        # Check for missing essential claims
+        
+       
         essential_claims = ['iss', 'sub', 'aud', 'exp', 'iat']
         missing_claims = [claim for claim in essential_claims if claim not in payload]
         
@@ -198,7 +193,7 @@ class JWTScanner:
                 'description': f'JWT missing recommended claims: {", ".join(missing_claims)}'
             })
 
-        # Check expiration
+        
         if 'exp' in payload:
             import time
             current_time = int(time.time())
@@ -219,7 +214,7 @@ class JWTScanner:
                 'description': 'JWT token has no expiration time (exp claim)'
             })
 
-        # Check for sensitive information in payload
+        
         sensitive_keys = ['password', 'secret', 'key', 'token', 'api_key', 'private']
         found_sensitive = []
         
@@ -244,9 +239,9 @@ class JWTScanner:
             })
 
     def _check_signature_bypass(self, token, results):
-        """Check for signature verification bypass techniques"""
         
-        # Test empty signature
+        
+        
         parts = token.split('.')
         empty_sig_token = f"{parts[0]}.{parts[1]}."
         
@@ -256,7 +251,7 @@ class JWTScanner:
             'description': f'Test empty signature: {empty_sig_token}'
         })
 
-        # Test removing signature entirely
+        
         no_sig_token = f"{parts[0]}.{parts[1]}"
         
         results['findings'].append({
